@@ -5,3 +5,4 @@
 | HC0003 | Apollo Federation | The key attribute is used on the type level without specifying the fieldset.                               |
 | HC0004 | Apollo Federation | The provides attribute is used and the fieldset is set to `null` or `string.Empty`.                        |
 | HC0005 | Apollo Federation | The requires attribute is used and the fieldset is set to `null` or `string.Empty`.                        |
+| HC0006 | Apollo Federation | No entity types were declared.                                                                             |

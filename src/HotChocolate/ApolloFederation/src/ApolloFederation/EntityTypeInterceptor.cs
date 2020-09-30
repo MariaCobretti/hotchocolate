@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,6 +8,7 @@ using HotChocolate.Types;
 using HotChocolate.Types.Descriptors;
 using HotChocolate.Types.Descriptors.Definitions;
 using static HotChocolate.ApolloFederation.WellKnownContextData;
+using static HotChocolate.ApolloFederation.ThrowHelper;
 
 namespace HotChocolate.ApolloFederation
 {
@@ -28,6 +30,14 @@ namespace HotChocolate.ApolloFederation
             AggregatePropertyLevelKeyDirectives(
                 discoveryContext,
                 definition);
+        }
+
+        public override void OnTypesInitialized(IReadOnlyCollection<ITypeDiscoveryContext> discoveryContexts)
+        {
+            if (!_entityTypes.Any())
+            {
+                throw EntityType_NoEntities();
+            }
         }
 
         public override void OnBeforeCompleteType(

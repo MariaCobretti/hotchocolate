@@ -1,4 +1,6 @@
+using System;
 using Xunit;
+using static HotChocolate.ApolloFederation.Properties.FederationResources;
 
 namespace HotChocolate.ApolloFederation
 {
@@ -99,6 +101,22 @@ namespace HotChocolate.ApolloFederation
             // assert
             Assert.Collection(entityType.Types.Values,
                 t => Assert.Equal("User", t.Name));
+        }
+
+        [Fact]
+        public void TestEntityTypeCodeFirstNoEntities_ShouldThrow()
+        {
+            Action createSchema = () =>
+                {
+                    // arrange
+                    ISchema schema = SchemaBuilder.New()
+                        .AddApolloFederation()
+                        .AddQueryType<Query<Address>>()
+                        .Create();
+
+                };
+            var exception = Assert.Throws<SchemaException>(createSchema);
+            Assert.Contains(ThrowHelper_EntityType_NoEntities ,exception.Message);
         }
 
         [Fact]

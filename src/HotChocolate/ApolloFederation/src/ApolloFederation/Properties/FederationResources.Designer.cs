@@ -128,5 +128,11 @@ namespace HotChocolate.ApolloFederation.Properties {
                 return ResourceManager.GetString("FieldDescriptorExtensions_Provides_FieldSet_CannotBeNullOrEmpty", resourceCulture);
             }
         }
+        
+        internal static string ThrowHelper_EntityType_NoEntities {
+            get {
+                return ResourceManager.GetString("ThrowHelper_EntityType_NoEntities", resourceCulture);
+            }
+        }
     }
 }
