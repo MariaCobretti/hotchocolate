@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using HotChocolate.AspNetCore;
 using HotChocolate.AspNetCore.Playground;
+using Inventory.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +20,7 @@ namespace Inventory
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddGraphQLServer()
+                .AddType<Product>()
                 .AddQueryType<Query>()
                 .AddApolloFederation();
         }
