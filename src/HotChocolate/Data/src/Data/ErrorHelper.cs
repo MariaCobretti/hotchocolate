@@ -9,7 +9,7 @@ using HotChocolate.Types;
 
 namespace HotChocolate.Data
 {
-    internal static class ErrorHelper
+    public static class ErrorHelper
     {
         public static IError CreateNonNullError<T>(
             IFilterField field,
