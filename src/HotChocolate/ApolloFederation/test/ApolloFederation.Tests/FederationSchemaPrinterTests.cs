@@ -40,6 +40,46 @@ namespace HotChocolate.ApolloFederation
             FederationSchemaPrinter.Print(schema).MatchSnapshot();
         }
 
+        [Fact]
+        public void TestFederationPrinterSchemaFirst()
+        {
+            // arrange
+            ISchema schema = SchemaBuilder.New()
+                .AddApolloFederation()
+                .AddDocumentFromString(
+                    @"
+                type TestType @key(fields: ""id"") {
+                    id: Int!
+                    name: String!
+                    enum: SomeEnum
+                }
+
+                type TestTypeTwo {
+                    id: Int!
+                }
+
+                union TestTypes = TestType | TestTypeTwo
+
+                enum SomeEnum {
+                   FOO
+                   BAR
+                }
+
+                type Query implements iQuery {
+                    someField(a: Int): TestType
+                }
+
+                interface iQuery {
+                    someField(a: Int): TestType
+                }
+                ")
+                .Use(next => context => default)
+                .Create();
+
+            // assert
+            FederationSchemaPrinter.Print(schema).MatchSnapshot();
+        }
+
         [Fact(Skip = "Wait for SchemaFirstFixes")]
         public void TestFederationPrinterApolloTypeExtensionSchemaFirst()
         {

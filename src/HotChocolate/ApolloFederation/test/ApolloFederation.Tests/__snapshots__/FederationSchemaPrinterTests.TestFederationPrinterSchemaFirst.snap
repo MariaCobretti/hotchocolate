@@ -1,0 +1,24 @@
+﻿interface iQuery {
+  someField(a: Int = null): TestType
+}
+
+type Query implements iQuery {
+  someField(a: Int = null): TestType
+}
+
+type TestType @key(fields: "id") {
+  id: Int!
+  name: String!
+  enum: SomeEnum
+}
+
+type TestTypeTwo {
+  id: Int!
+}
+
+union TestTypes = TestType | TestTypeTwo
+
+enum SomeEnum {
+  FOO
+  BAR
+}
