@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,7 +31,8 @@ namespace HotChocolate.ApolloFederation
                 definition);
         }
 
-        public override void OnTypesInitialized(IReadOnlyCollection<ITypeDiscoveryContext> discoveryContexts)
+        public override void OnTypesInitialized(
+            IReadOnlyCollection<ITypeDiscoveryContext> discoveryContexts)
         {
             if (!_entityTypes.Any())
             {
@@ -54,12 +54,16 @@ namespace HotChocolate.ApolloFederation
                 definition);
         }
 
-        private void AddServiceTypeToQueryType(ITypeCompletionContext completionContext, DefinitionBase definition)
+        private void AddServiceTypeToQueryType(
+            ITypeCompletionContext completionContext,
+            DefinitionBase definition)
         {
             if (completionContext.IsQueryType == true &&
                 definition is ObjectTypeDefinition objectTypeDefinition)
             {
-                var fieldDescriptor = ObjectFieldDescriptor.New(completionContext.DescriptorContext, WellKnownFieldNames.Service);
+                var fieldDescriptor = ObjectFieldDescriptor.New(
+                    completionContext.DescriptorContext,
+                    WellKnownFieldNames.Service);
                 fieldDescriptor
                     .Type<NonNullType<ServiceType>>()
                     .Resolver(ctx => new ServiceType());
@@ -75,7 +79,8 @@ namespace HotChocolate.ApolloFederation
                 definition is ObjectTypeDefinition objectTypeDefinition)
             {
                 if (objectTypeDefinition.Directives.Any(
-                        d => d.Reference is NameDirectiveReference { Name: { Value: WellKnownTypeNames.Key }}) ||
+                        d => d.Reference is NameDirectiveReference
+                            { Name: { Value: WellKnownTypeNames.Key }}) ||
                     objectTypeDefinition.Fields.Any(
                         f => f.ContextData.ContainsKey(WellKnownTypeNames.Key)))
                 {

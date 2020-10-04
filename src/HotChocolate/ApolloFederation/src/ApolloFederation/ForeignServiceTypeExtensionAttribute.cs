@@ -13,9 +13,12 @@ namespace HotChocolate.ApolloFederation
         AttributeTargets.Class |
         AttributeTargets.Struct |
         AttributeTargets.Interface)]
-    public class ForeignServiceTypeExtensionAttribute : ObjectTypeDescriptorAttribute
+    public sealed class ForeignServiceTypeExtensionAttribute : ObjectTypeDescriptorAttribute
     {
-        public override void OnConfigure(IDescriptorContext context, IObjectTypeDescriptor descriptor, Type type)
+        public override void OnConfigure(
+            IDescriptorContext context,
+            IObjectTypeDescriptor descriptor,
+            Type type)
         {
             descriptor
                 .Extend()
