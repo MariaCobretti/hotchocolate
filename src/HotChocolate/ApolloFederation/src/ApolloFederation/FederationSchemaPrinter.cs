@@ -42,6 +42,7 @@ namespace HotChocolate.ApolloFederation
                         referenced
                     )
                 )
+                .Where(node => node != null)
                 .OfType<IDefinitionNode>()
                 .ToList();
 
@@ -87,7 +88,7 @@ namespace HotChocolate.ApolloFederation
             return true;
         }
 
-        private static IDefinitionNode SerializeNonScalarTypeDefinition(
+        private static IDefinitionNode? SerializeNonScalarTypeDefinition(
             INamedType namedType,
             ReferencedTypes referenced)
         {
@@ -128,7 +129,7 @@ namespace HotChocolate.ApolloFederation
             }
         }
 
-        private static IDefinitionNode SerializeObjectType(
+        private static IDefinitionNode? SerializeObjectType(
             ObjectType objectType,
             ReferencedTypes referenced)
         {
@@ -160,6 +161,11 @@ namespace HotChocolate.ApolloFederation
                     )
                 )
                 .ToList();
+
+            if (fields.Count == 0)
+            {
+                return null;
+            }
 
             if (objectType.ContextData.ContainsKey(WellKnownContextData.ExtendMarker))
             {

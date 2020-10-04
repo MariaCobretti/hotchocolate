@@ -4,7 +4,7 @@ using static HotChocolate.ApolloFederation.Properties.FederationResources;
 
 namespace HotChocolate.ApolloFederation
 {
-    public class EntityTypeTest
+    public class EntityTypeTests
     {
         [Fact]
         public void TestEntityTypeSchemaFirstSingleKey()

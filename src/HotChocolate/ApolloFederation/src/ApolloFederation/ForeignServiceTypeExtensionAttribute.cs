@@ -5,7 +5,9 @@ using HotChocolate.Types.Descriptors;
 namespace HotChocolate.ApolloFederation
 {
     /// <summary>
-    ///
+    /// This attribute is used to mark types as an extended type
+    /// of a type that is defined by another service when
+    /// using apollo federation.
     /// </summary>
     [AttributeUsage(
         AttributeTargets.Class |

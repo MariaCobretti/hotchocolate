@@ -1,4 +1,4 @@
-using HotChocolate.Types;
+using System;
 using Snapshooter.Xunit;
 using Xunit;
 
@@ -6,7 +6,18 @@ namespace HotChocolate.ApolloFederation
 {
     public class FederationSchemaPrinterTests
     {
-        [Fact(Skip = "WIP")]
+        [Fact]
+        public void TestFederationPrinter_ShouldThrow()
+        {
+            // arrange
+            ISchema? schema = null;
+            void action() => FederationSchemaPrinter.Print(schema);
+
+            // assert
+            Assert.Throws<ArgumentNullException>(action);
+        }
+
+        [Fact]
         public void TestFederationPrinterApolloDirectivesSchemaFirst()
         {
             // arrange
@@ -14,6 +25,29 @@ namespace HotChocolate.ApolloFederation
                 .AddApolloFederation()
                 .AddDocumentFromString(
                 @"
+                type TestType @key(fields: ""id"") {
+                    id: Int!
+                    name: String!
+                }
+
+                type Query {
+                    someField(a: Int): TestType
+                }")
+                .Use(next => context => default)
+                .Create();
+
+            // assert
+            FederationSchemaPrinter.Print(schema).MatchSnapshot();
+        }
+
+        [Fact(Skip = "Wait for SchemaFirstFixes")]
+        public void TestFederationPrinterApolloTypeExtensionSchemaFirst()
+        {
+            // arrange
+            ISchema schema = SchemaBuilder.New()
+                .AddApolloFederation()
+                .AddDocumentFromString(
+                    @"
                 extend type TestType @key(fields: ""id"") {
                     id: Int!
                     name: String!
