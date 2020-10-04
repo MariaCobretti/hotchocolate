@@ -2,6 +2,15 @@
   someField(a: Int = null): TestType
 }
 
+interface iTestType @key(fields: "id") {
+  id: Int!
+  external: String! @external
+}
+
+type Mutation {
+  doSomething(input: SomeInput = null): Boolean
+}
+
 type Query implements iQuery {
   someField(a: Int = null): TestType
 }
@@ -17,6 +26,12 @@ type TestTypeTwo {
 }
 
 union TestTypes = TestType | TestTypeTwo
+
+input SomeInput {
+  name: String!
+  description: String
+  someEnum: SomeEnum
+}
 
 enum SomeEnum {
   FOO

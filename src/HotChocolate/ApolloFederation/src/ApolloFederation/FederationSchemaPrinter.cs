@@ -28,11 +28,6 @@ namespace HotChocolate.ApolloFederation
         private static DocumentNode SerializeSchema(
             ISchema schema)
         {
-            if (schema is null)
-            {
-                throw new ArgumentNullException(nameof(schema));
-            }
-
             var referenced = new ReferencedTypes();
 
             var typeDefinitions = GetNonScalarTypes(schema)

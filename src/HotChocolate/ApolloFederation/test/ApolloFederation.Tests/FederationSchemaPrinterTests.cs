@@ -58,11 +58,26 @@ namespace HotChocolate.ApolloFederation
                     id: Int!
                 }
 
+                interface iTestType @key(fields: ""id"") {
+                    id: Int!
+                    external: String! @external
+                }
+
                 union TestTypes = TestType | TestTypeTwo
 
                 enum SomeEnum {
                    FOO
                    BAR
+                }
+
+                input SomeInput {
+                  name: String!
+                  description: String
+                  someEnum: SomeEnum
+                }
+
+                type Mutation {
+                    doSomething(input: SomeInput): Boolean
                 }
 
                 type Query implements iQuery {
