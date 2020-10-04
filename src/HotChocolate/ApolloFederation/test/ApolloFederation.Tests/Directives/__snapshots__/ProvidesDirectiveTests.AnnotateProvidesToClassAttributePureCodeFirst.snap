@@ -8,11 +8,16 @@ type Product {
 
 type Query {
   someField(id: Int!): Review!
+  _service: _Service
 }
 
 type Review @key(fields: "id") {
   id: Int!
   product: Product! @provides(fields: "name")
+}
+
+type _Service {
+  sdl: String
 }
 
 "Union of all types that key directive applied. This information is needed by the Apollo federation gateway."

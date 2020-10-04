@@ -4,11 +4,16 @@
 
 type QueryOfTestTypePropertyDirectives {
   someField(id: Int!): TestTypePropertyDirectives!
+  _service: _Service
 }
 
 type TestTypePropertyDirectives @key(fields: "id name") {
   id: Int!
   name: String!
+}
+
+type _Service {
+  sdl: String
 }
 
 "Union of all types that key directive applied. This information is needed by the Apollo federation gateway."

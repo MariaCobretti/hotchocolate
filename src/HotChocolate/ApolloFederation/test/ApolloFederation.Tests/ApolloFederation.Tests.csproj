@@ -15,6 +15,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.4.1" />
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Directives\__snapshots__" />
     <Folder Include="__snapshots__" />
   </ItemGroup>
 

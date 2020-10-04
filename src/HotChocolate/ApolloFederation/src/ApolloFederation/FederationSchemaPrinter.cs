@@ -1,16 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
 using HotChocolate.Language;
 using HotChocolate.Types;
 using HotChocolate.Types.Introspection;
 
 namespace HotChocolate.ApolloFederation
 {
-    public class FederationSchemaPrinter
+    public static class FederationSchemaPrinter
     {
+        private static readonly HashSet<Type> _apolloFederationTypeAdditions = new HashSet<Type>
+        {
+            typeof(EntityType),
+            typeof(ServiceType)
+        };
+
         public static string Print(ISchema schema)
         {
             if (schema is null)
@@ -41,47 +45,6 @@ namespace HotChocolate.ApolloFederation
                 .OfType<IDefinitionNode>()
                 .ToList();
 
-            if (schema.QueryType != null
-                || schema.MutationType != null
-                || schema.SubscriptionType != null)
-            {
-                typeDefinitions.Insert(
-                    0,
-                    SerializeSchemaTypeDefinition(
-                        schema,
-                        referenced
-                    )
-                );
-            }
-
-            IEnumerable<DirectiveDefinitionNode> directiveTypeDefinitions =
-                schema.DirectiveTypes
-                    .Where(t => referenced.DirectiveNames.Contains(t.Name))
-                    .OrderBy(
-                        t => t.Name.ToString(),
-                        StringComparer.Ordinal
-                    )
-                    .Select(
-                        t => SerializeDirectiveTypeDefinition(
-                            t,
-                            referenced
-                        )
-                    );
-
-            typeDefinitions.AddRange(directiveTypeDefinitions);
-
-            IEnumerable<ScalarTypeDefinitionNode> scalarTypeDefinitions =
-                schema.Types
-                    .OfType<ScalarType>()
-                    .Where(t => referenced.TypeNames.Contains(t.Name))
-                    .OrderBy(
-                        t => t.Name.ToString(),
-                        StringComparer.Ordinal
-                    )
-                    .Select(t => SerializeScalarType(t));
-
-            typeDefinitions.AddRange(scalarTypeDefinitions);
-
             return new DocumentNode(
                 null,
                 typeDefinitions
@@ -93,7 +56,7 @@ namespace HotChocolate.ApolloFederation
         {
             return schema.Types
                 .Where(t => IsPublicAndNoScalar(t))
-                .Where(t => IsNotApolloType(t)) // todo: name
+                .Where(t => IsNotApolloTypeAddition(t))
                 .OrderBy(
                     t => t.Name.ToString(),
                     StringComparer.Ordinal
@@ -103,10 +66,9 @@ namespace HotChocolate.ApolloFederation
                 .SelectMany(t => t);
         }
 
-        private static readonly HashSet<Type> ApolloFederationTypes = new HashSet<Type>(); // todo: name, types
-        private static bool IsNotApolloType(INamedType type)
+        private static bool IsNotApolloTypeAddition(INamedType type)
         {
-            if (ApolloFederationTypes.Contains(type.GetType()))
+            if (_apolloFederationTypeAdditions.Contains(type.GetType()))
             {
                 return false;
             }
@@ -125,105 +87,7 @@ namespace HotChocolate.ApolloFederation
             return true;
         }
 
-        private static DirectiveDefinitionNode SerializeDirectiveTypeDefinition(
-            DirectiveType directiveType,
-            ReferencedTypes referenced)
-        {
-            var arguments = directiveType.Arguments
-                .Select(
-                    t => SerializeInputField(
-                        t,
-                        referenced
-                    )
-                )
-                .ToList();
-
-            var locations = directiveType.Locations
-                .Select(l => new NameNode(l.MapDirectiveLocation().ToString()))
-                .ToList();
-
-            return new DirectiveDefinitionNode(
-                null,
-                new NameNode(directiveType.Name),
-                SerializeDescription(directiveType.Description),
-                directiveType.IsRepeatable,
-                arguments,
-                locations
-            );
-        }
-
-        private static SchemaDefinitionNode SerializeSchemaTypeDefinition(
-            ISchema schema,
-            ReferencedTypes referenced)
-        {
-            var operations = new List<OperationTypeDefinitionNode>();
-
-            if (schema.QueryType != null)
-            {
-                operations.Add(
-                    SerializeOperationType(
-                        schema.QueryType,
-                        OperationType.Query,
-                        referenced
-                    )
-                );
-            }
-
-            if (schema.MutationType != null)
-            {
-                operations.Add(
-                    SerializeOperationType(
-                        schema.MutationType,
-                        OperationType.Mutation,
-                        referenced
-                    )
-                );
-            }
-
-            if (schema.SubscriptionType != null)
-            {
-                operations.Add(
-                    SerializeOperationType(
-                        schema.SubscriptionType,
-                        OperationType.Subscription,
-                        referenced
-                    )
-                );
-            }
-
-            var directives = schema.Directives
-                .Select(
-                    t => SerializeDirective(
-                        t,
-                        referenced
-                    )
-                )
-                .ToList();
-
-            return new SchemaDefinitionNode(
-                null,
-                SerializeDescription(schema.Description),
-                directives,
-                operations
-            );
-        }
-
-        private static OperationTypeDefinitionNode SerializeOperationType(
-            ObjectType type,
-            OperationType operation,
-            ReferencedTypes referenced)
-        {
-            return new OperationTypeDefinitionNode(
-                null,
-                operation,
-                SerializeNamedType(
-                    type,
-                    referenced
-                )
-            );
-        }
-
-        private static ITypeDefinitionNode SerializeNonScalarTypeDefinition(
+        private static IDefinitionNode SerializeNonScalarTypeDefinition(
             INamedType namedType,
             ReferencedTypes referenced)
         {
@@ -264,7 +128,7 @@ namespace HotChocolate.ApolloFederation
             }
         }
 
-        private static ObjectTypeDefinitionNode SerializeObjectType(
+        private static IDefinitionNode SerializeObjectType(
             ObjectType objectType,
             ReferencedTypes referenced)
         {
@@ -288,6 +152,7 @@ namespace HotChocolate.ApolloFederation
 
             var fields = objectType.Fields
                 .Where(t => !t.IsIntrospectionField)
+                .Where(t => IsNotApolloTypeAddition(t.Type.NamedType()))
                 .Select(
                     t => SerializeObjectField(
                         t,
@@ -295,6 +160,17 @@ namespace HotChocolate.ApolloFederation
                     )
                 )
                 .ToList();
+
+            if (objectType.ContextData.ContainsKey(WellKnownContextData.ExtendMarker))
+            {
+                return new ObjectTypeExtensionNode(
+                    null,
+                    new NameNode(objectType.Name),
+                    directives,
+                    interfaces,
+                    fields
+                );
+            }
 
             return new ObjectTypeDefinitionNode(
                 null,
@@ -450,17 +326,6 @@ namespace HotChocolate.ApolloFederation
                 new NameNode(enumValue.Name),
                 SerializeDescription(enumValue.Description),
                 directives
-            );
-        }
-
-        private static ScalarTypeDefinitionNode SerializeScalarType(
-            ScalarType scalarType)
-        {
-            return new ScalarTypeDefinitionNode(
-                null,
-                new NameNode(scalarType.Name),
-                SerializeDescription(scalarType.Description),
-                Array.Empty<DirectiveNode>()
             );
         }
 

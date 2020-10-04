@@ -6,13 +6,27 @@ namespace HotChocolate.ApolloFederation
 {
     public class FederationSchemaPrinterTests
     {
-        [Fact]
+        [Fact(Skip = "WIP")]
         public void TestFederationPrinterApolloDirectivesSchemaFirst()
         {
             // arrange
-            // todo
+            ISchema schema = SchemaBuilder.New()
+                .AddApolloFederation()
+                .AddDocumentFromString(
+                @"
+                extend type TestType @key(fields: ""id"") {
+                    id: Int!
+                    name: String!
+                }
 
-            // act
+                type Query {
+                    someField(a: Int): TestType
+                }")
+                .Use(next => context => default)
+                .Create();
+
+            // assert
+            FederationSchemaPrinter.Print(schema).MatchSnapshot();
         }
 
         [Fact]
@@ -21,16 +35,29 @@ namespace HotChocolate.ApolloFederation
             // arrange
             ISchema schema = SchemaBuilder.New()
                 .AddApolloFederation()
-                .AddQueryType<Query>()
+                .AddQueryType<QueryRoot<User>>()
                 .Create();
 
             // check
             FederationSchemaPrinter.Print(schema).MatchSnapshot();
         }
 
-        public class Query
+        [Fact]
+        public void TestFederationPrinterTypeExtensionPureCodeFirst()
         {
-            public User GetEntity(int id) => default;
+            // arrange
+            ISchema schema = SchemaBuilder.New()
+                .AddApolloFederation()
+                .AddQueryType<QueryRoot<Product>>()
+                .Create();
+
+            // check
+            FederationSchemaPrinter.Print(schema).MatchSnapshot();
+        }
+
+        public class QueryRoot<T>
+        {
+            public T GetEntity(int id) => default;
         }
 
         public class User
@@ -49,6 +76,13 @@ namespace HotChocolate.ApolloFederation
         {
             [External]
             public string Zipcode { get; set; }
+        }
+
+        [ForeignServiceTypeExtension]
+        public class Product
+        {
+            [Key]
+            public string Upc { get; set; }
         }
     }
 }

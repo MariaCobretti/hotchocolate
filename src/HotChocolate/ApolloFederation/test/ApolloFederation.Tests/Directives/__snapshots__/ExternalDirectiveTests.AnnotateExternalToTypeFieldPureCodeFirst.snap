@@ -4,11 +4,16 @@
 
 type Query {
   entity(id: Int!): User!
+  _service: _Service
 }
 
 type User @key(fields: "id") {
   id: Int!
   idCode: String! @external
+}
+
+type _Service {
+  sdl: String
 }
 
 "Union of all types that key directive applied. This information is needed by the Apollo federation gateway."
