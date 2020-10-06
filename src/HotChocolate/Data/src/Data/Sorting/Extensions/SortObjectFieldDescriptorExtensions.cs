@@ -34,7 +34,7 @@ namespace HotChocolate.Types
                 throw new ArgumentNullException(nameof(descriptor));
             }
 
-            return UseSorting(descriptor, null, null, scope);
+            return UseSorting(descriptor, null, null, null, scope);
         }
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace HotChocolate.Types
                     ? typeof(T)
                     : typeof(SortInputType<>).MakeGenericType(typeof(T));
 
-            return UseSorting(descriptor, sortType, null, scope);
+            return UseSorting(descriptor, sortType, null, null, scope);
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace HotChocolate.Types
             }
 
             var sortType = new SortInputType<T>(configure);
-            return UseSorting(descriptor, sortType.GetType(), sortType, scope);
+            return UseSorting(descriptor, sortType.GetType(), null, sortType, scope);
         }
 
         /// <summary>
@@ -118,12 +118,46 @@ namespace HotChocolate.Types
                     ? type
                     : typeof(SortInputType<>).MakeGenericType(type);
 
-            return UseSorting(descriptor, sortType, null, scope);
+            return UseSorting(descriptor, sortType, null, null, scope);
+        }
+
+        /// <summary>
+        /// Registers the middleware and adds the arguments for sorting
+        /// </summary>
+        /// <param name="descriptor">The field descriptor where the arguments and middleware are
+        /// applied to</param>
+        /// <param name="schemaType">Either a runtime type or a <see cref="SortInputType"/></param>
+        /// <param name="entityType">The type that is returned by the data source. schemaType will be used if none is provided</param>
+        /// <param name="scope">Specifies what scope should be used for the
+        /// <see cref="SortConvention" /></param>
+        public static IObjectFieldDescriptor UseSorting(
+            this IObjectFieldDescriptor descriptor,
+            Type schemaType,
+            Type? entityType = null,
+            string? scope = null)
+        {
+            if (descriptor is null)
+            {
+                throw new ArgumentNullException(nameof(descriptor));
+            }
+
+            if (schemaType is null)
+            {
+                throw new ArgumentNullException(nameof(schemaType));
+            }
+
+            Type sortType =
+                typeof(ISortInputType).IsAssignableFrom(schemaType)
+                    ? schemaType
+                    : typeof(SortInputType<>).MakeGenericType(schemaType);
+
+            return UseSorting(descriptor, sortType, entityType, null, scope);
         }
 
         private static IObjectFieldDescriptor UseSorting(
             IObjectFieldDescriptor descriptor,
-            Type? sortType,
+            Type? schemaType,
+            Type? entityType,
             ITypeSystemMember? sortTypeInstance,
             string? scope)
         {
@@ -134,10 +168,9 @@ namespace HotChocolate.Types
             descriptor
                 .Use(placeholder)
                 .Extend()
-                .OnBeforeCreate(
-                    (c, definition) =>
-                    {
-                        Type? argumentType = sortType;
+                .OnBeforeCreate((c, definition) =>
+                {
+                    Type? argumentType = schemaType;
 
                         if (argumentType is null)
                         {
@@ -156,12 +189,12 @@ namespace HotChocolate.Types
                                 .MakeGenericType(typeInfo.NamedType);
                         }
 
-                        ITypeReference argumentTypeReference = sortTypeInstance is null
-                            ? (ITypeReference)c.TypeInspector.GetTypeRef(
-                                argumentType,
-                                TypeContext.Input,
-                                scope)
-                            : TypeReference.Create(sortTypeInstance, scope);
+                    ITypeReference argumentTypeReference = sortTypeInstance is null
+                        ? (ITypeReference)c.TypeInspector.GetTypeRef(
+                            entityType ?? argumentType,
+                            TypeContext.Input,
+                            scope)
+                        : TypeReference.Create(sortTypeInstance, scope);
 
                         if (argumentType == typeof(object))
                         {
