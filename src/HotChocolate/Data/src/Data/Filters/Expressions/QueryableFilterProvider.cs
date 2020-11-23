@@ -33,7 +33,7 @@ namespace HotChocolate.Data.Filters.Expressions
         }
 
         protected virtual FilterVisitor<QueryableFilterContext, Expression> Visitor { get; } =
-            new FilterVisitor<QueryableFilterContext, Expression>(new QueryableCombinator());
+            new FilterVisitor<QueryableFilterContext, Expression>(new QueryableCombinator<QueryableFilterContext>());
 
         public override FieldMiddleware CreateExecutor<TEntityType>(NameString argumentName)
         {
