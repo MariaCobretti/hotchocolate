@@ -91,7 +91,7 @@ namespace HotChocolate.Types
                     ? type
                     : typeof(SortInputType<>).MakeGenericType(type);
 
-            return UseSorting(descriptor, sortType, null, null, scope);
+            return UseSorting(descriptor, sortType, null, scope);
         }
 
         /// <summary>
@@ -145,7 +145,7 @@ namespace HotChocolate.Types
                     {
                         ISortConvention convention = c.GetSortConvention(scope);
                         Type argumentType;
-                        if (sortType is null)
+                        if (schemaType is null)
                         {
                             if (definition.ResultType is null ||
                                 definition.ResultType == typeof(object) ||
