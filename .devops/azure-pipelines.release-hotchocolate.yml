@@ -57,15 +57,15 @@ stages:
           - task: CmdLine@2
             inputs:
               script: "./build.cmd publish --skip"
-          - task: GitHubRelease@0
-            displayName: "GitHub release"
-            inputs:
-              gitHubConnection: "ChilliCream GitHub"
-              action: edit
-              tag: "$(GitHubVersion)"
-              title: "$(GitHubVersion)"
-              assets: "$(Build.Repository.LocalPath)/output/packages/*.*"
-              assetUploadMode: replace
-              isPreRelease: true
-              releaseNotesSource: input
-              releaseNotes: "For more details click [here](https://github.com/ChilliCream/hotchocolate/blob/master/CHANGELOG.md) to get to our CHANGELOG."
+          # - task: GitHubRelease@0
+          #   displayName: "GitHub release"
+          #   inputs:
+          #     gitHubConnection: "ChilliCream GitHub"
+          #     action: edit
+          #     tag: "$(GitHubVersion)"
+          #     title: "$(GitHubVersion)"
+          #     assets: "$(Build.Repository.LocalPath)/output/packages/*.*"
+          #     assetUploadMode: replace
+          #     isPreRelease: true
+          #     releaseNotesSource: input
+          #     releaseNotes: "For more details click [here](https://github.com/ChilliCream/hotchocolate/blob/master/CHANGELOG.md) to get to our CHANGELOG."
