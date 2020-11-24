@@ -175,7 +175,7 @@ namespace HotChocolate.Data.Tests
                 .AddSorting()
                 .AddQueryType<Query>(
                     c =>
-                        c.Field(x => x.GetFoos()).UseSorting(typeof(Bar)));
+                        c.Field(x => x.GetFoos()).UseSorting(typeof(Bar), null));
 
             ISchema schema = builder.Create();
 
@@ -192,7 +192,7 @@ namespace HotChocolate.Data.Tests
                 .AddSorting()
                 .AddQueryType<Query>(
                     c =>
-                        c.Field(x => x.GetFoos()).UseSorting(typeof(BarSortType)));
+                        c.Field(x => x.GetFoos()).UseSorting(typeof(BarSortType), null));
 
             ISchema schema = builder.Create();
 
