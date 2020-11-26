@@ -37,7 +37,7 @@ namespace HotChocolate.Types
                 throw new ArgumentNullException(nameof(descriptor));
             }
 
-            return UseFiltering(descriptor, null, null, null, scope);
+            return UseFiltering(descriptor, null, null, scope);
         }
 
         /// <summary>
@@ -62,7 +62,7 @@ namespace HotChocolate.Types
                     ? typeof(T)
                     : typeof(FilterInputType<>).MakeGenericType(typeof(T));
 
-            return UseFiltering(descriptor, filterType, null, null, scope);
+            return UseFiltering(descriptor, filterType, null, scope);
         }
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace HotChocolate.Types
             }
 
             var filterType = new FilterInputType<T>(configure);
-            return UseFiltering(descriptor, filterType.GetType(), null, filterType, scope);
+            return UseFiltering(descriptor, filterType.GetType(), filterType, scope);
         }
 
         /// <summary>
@@ -121,46 +121,45 @@ namespace HotChocolate.Types
                     ? type
                     : typeof(FilterInputType<>).MakeGenericType(type);
 
-            return UseFiltering(descriptor, filterType, null, null, scope);
+            return UseFiltering(descriptor, filterType, null, scope);
         }
 
-        /// <summary>
-        /// Registers the middleware and adds the arguments for filtering
-        /// </summary>
-        /// <param name="descriptor">The field descriptor where the arguments and middleware are
-        /// applied to</param>
-        /// <param name="schemaType">Either a runtime type or a <see cref="FilterInputType"/></param>
-        /// <param name="entityType">The type that is returned by the data source. schemaType will be used if none is provided</param>
-        /// <param name="scope">Specifies what scope should be used for the
-        /// <see cref="FilterConvention" /></param>
-        public static IObjectFieldDescriptor UseFiltering(
-            this IObjectFieldDescriptor descriptor,
-            Type schemaType,
-            Type? entityType,
-            string? scope = null)
-        {
-            if (descriptor is null)
-            {
-                throw new ArgumentNullException(nameof(descriptor));
-            }
+        ///// <summary>
+        ///// Registers the middleware and adds the arguments for filtering
+        ///// </summary>
+        ///// <param name="descriptor">The field descriptor where the arguments and middleware are
+        ///// applied to</param>
+        ///// <param name="schemaType">Either a runtime type or a <see cref="FilterInputType"/></param>
+        ///// <param name="entityType">The type that is returned by the data source. schemaType will be used if none is provided</param>
+        ///// <param name="scope">Specifies what scope should be used for the
+        ///// <see cref="FilterConvention" /></param>
+        //public static IObjectFieldDescriptor UseFiltering(
+        //    this IObjectFieldDescriptor descriptor,
+        //    Type schemaType,
+        //    Type? entityType,
+        //    string? scope = null)
+        //{
+        //    if (descriptor is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(descriptor));
+        //    }
 
-            if (schemaType is null)
-            {
-                throw new ArgumentNullException(nameof(schemaType));
-            }
+        //    if (schemaType is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(schemaType));
+        //    }
 
-            Type filterType =
-                typeof(IFilterInputType).IsAssignableFrom(schemaType)
-                    ? schemaType
-                    : typeof(FilterInputType<>).MakeGenericType(schemaType);
+        //    Type filterType =
+        //        typeof(IFilterInputType).IsAssignableFrom(schemaType)
+        //            ? schemaType
+        //            : typeof(FilterInputType<>).MakeGenericType(schemaType);
 
-            return UseFiltering(descriptor, filterType, entityType, null, scope);
-        }
+        //    return UseFiltering(descriptor, filterType, entityType, null, scope);
+        //}
 
         private static IObjectFieldDescriptor UseFiltering(
             IObjectFieldDescriptor descriptor,
             Type? filterType,
-            Type? entityType,
             ITypeSystemMember? filterTypeInstance,
             string? scope)
         {
@@ -199,7 +198,7 @@ namespace HotChocolate.Types
                         else
                         {
                             argumentTypeReference = c.TypeInspector.GetTypeRef(
-                                entityType ?? filterType,
+                                filterType,
                                 TypeContext.Input,
                                 scope);
                         }

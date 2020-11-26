@@ -35,7 +35,7 @@ namespace HotChocolate.Types
                 throw new ArgumentNullException(nameof(descriptor));
             }
 
-            return UseSortingInternal(descriptor, null, null, scope);
+            return UseSortingInternal(descriptor, null, scope);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace HotChocolate.Types
                     ? typeof(T)
                     : typeof(SortInputType<>).MakeGenericType(typeof(T));
 
-            return UseSorting(descriptor, sortType, null, scope);
+            return UseSorting(descriptor, sortType, scope);
         }
 
         /// <summary>
@@ -91,46 +91,45 @@ namespace HotChocolate.Types
                     ? type
                     : typeof(SortInputType<>).MakeGenericType(type);
 
-            return UseSorting(descriptor, sortType, null, scope);
+            return UseSortingInternal(descriptor, sortType, scope);
         }
 
-        /// <summary>
-        /// Registers the middleware and adds the arguments for sorting
-        /// </summary>
-        /// <param name="descriptor">The field descriptor where the arguments and middleware are
-        /// applied to</param>
-        /// <param name="schemaType">Either a runtime type or a <see cref="SortInputType"/></param>
-        /// <param name="entityType">The type that is returned by the data source. schemaType will be used if none is provided</param>
-        /// <param name="scope">Specifies what scope should be used for the
-        /// <see cref="SortConvention" /></param>
-        public static IObjectFieldDescriptor UseSorting(
-            this IObjectFieldDescriptor descriptor,
-            Type schemaType,
-            Type? entityType = null,
-            string? scope = null)
-        {
-            if (descriptor is null)
-            {
-                throw new ArgumentNullException(nameof(descriptor));
-            }
+        ///// <summary>
+        ///// Registers the middleware and adds the arguments for sorting
+        ///// </summary>
+        ///// <param name="descriptor">The field descriptor where the arguments and middleware are
+        ///// applied to</param>
+        ///// <param name="schemaType">Either a runtime type or a <see cref="SortInputType"/></param>
+        ///// <param name="entityType">The type that is returned by the data source. schemaType will be used if none is provided</param>
+        ///// <param name="scope">Specifies what scope should be used for the
+        ///// <see cref="SortConvention" /></param>
+        //public static IObjectFieldDescriptor UseSorting(
+        //    this IObjectFieldDescriptor descriptor,
+        //    Type schemaType,
+        //    Type? entityType = null,
+        //    string? scope = null)
+        //{
+        //    if (descriptor is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(descriptor));
+        //    }
 
-            if (schemaType is null)
-            {
-                throw new ArgumentNullException(nameof(schemaType));
-            }
+        //    if (schemaType is null)
+        //    {
+        //        throw new ArgumentNullException(nameof(schemaType));
+        //    }
 
-            Type sortType =
-                typeof(ISortInputType).IsAssignableFrom(schemaType)
-                    ? schemaType
-                    : typeof(SortInputType<>).MakeGenericType(schemaType);
+        //    Type sortType =
+        //        typeof(ISortInputType).IsAssignableFrom(schemaType)
+        //            ? schemaType
+        //            : typeof(SortInputType<>).MakeGenericType(schemaType);
 
-            return UseSortingInternal(descriptor, sortType, entityType, scope);
-        }
+        //    return UseSortingInternal(descriptor, sortType, scope);
+        //}
 
         private static IObjectFieldDescriptor UseSortingInternal(
             IObjectFieldDescriptor descriptor,
-            Type? schemaType,
-            Type? entityType,
+            Type? sortType,
             string? scope)
         {
             FieldMiddleware placeholder = next => context => default;
@@ -145,7 +144,7 @@ namespace HotChocolate.Types
                     {
                         ISortConvention convention = c.GetSortConvention(scope);
                         Type argumentType;
-                        if (schemaType is null)
+                        if (sortType is null)
                         {
                             if (definition.ResultType is null ||
                                 definition.ResultType == typeof(object) ||
@@ -165,12 +164,12 @@ namespace HotChocolate.Types
                         }
                         else
                         {
-                            argumentType = schemaType;
+                            argumentType = sortType;
                         }
 
                         ExtendedTypeReference argumentTypeReference = c.TypeInspector.GetTypeRef(
                             typeof(ListType<>).MakeGenericType(
-                                typeof(NonNullType<>).MakeGenericType(entityType ?? argumentType)),
+                                typeof(NonNullType<>).MakeGenericType(argumentType)),
                             TypeContext.Input,
                             scope);
 
